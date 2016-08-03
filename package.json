@@ -1,0 +1,23 @@
+{
+  "name": "adminjs-core-navigation",
+  "version": "1.0.0",
+  "description": "nav module for adminjs",
+  "main": "hawtio-core-navigation.js",
+  "dependencies": {
+    "angular": "^1.5.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kerryhatcher/AdminJS-core-navigation.git"
+  },
+  "author": "Kerry Hatcher <kwhatcher@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/kerryhatcher/AdminJS-core-navigation/issues"
+  },
+  "homepage": "https://github.com/kerryhatcher/AdminJS-core-navigation#readme"
+}
