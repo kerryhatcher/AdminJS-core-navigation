@@ -1007,7 +1007,7 @@ var HawtioMainNav;
 })(HawtioMainNav || (HawtioMainNav = {}));
 
 module.exports = {
-  "HawtioMainNav" = HawtioMainNav
+  "HawtioMainNav": HawtioMainNav
 }
 
 angular.module("hawtio-nav").run(["$templateCache", function($templateCache) {$templateCache.put("templates/main-nav/layoutFull.html","<div ng-view></div>\n\n\n");
