@@ -1,6 +1,6 @@
 {
   "name": "adminjs-core-navigation",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "nav module for adminjs",
   "main": "hawtio-core-navigation.js",
   "dependencies": {
