@@ -1,7 +1,3 @@
-'use strict';
-
-var _adminjsCore = require('adminjs-core');
-
 /* global _ */
 /* global angular */
 /* global jQuery */
@@ -11,25 +7,29 @@ var _adminjsCore = require('adminjs-core');
 // Polyfill custom event if necessary since we kinda need it
 // https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent#Polyfill
 
+var adminjsCore = require('adminjs-core');
+
 var angular = require('angular');
+var Logger = require('js-logger');
 
 
 (function () {
   if (typeof window.CustomEvent !== "function") {
-    var _CustomEvent = function _CustomEvent(event, params) {
+    function CustomEvent ( event, params ) {
       params = params || { bubbles: false, cancelable: false, detail: undefined };
-      var evt = document.createEvent('CustomEvent');
-      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+      var evt = document.createEvent( 'CustomEvent' );
+      evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
       return evt;
-    };
+    }
 
-    _CustomEvent.prototype = window.Event.prototype;
-    window.CustomEvent = _CustomEvent;
+    CustomEvent.prototype = window.Event.prototype;
+    window.CustomEvent = CustomEvent;
   }
 })();
 
+
 var HawtioMainNav;
-(function (HawtioMainNav) {
+(function(HawtioMainNav) {
 
   function documentBase($document) {
     var base = $document.find('base');
@@ -49,42 +49,42 @@ var HawtioMainNav;
   var log = Logger.get(HawtioMainNav.pluginName);
 
   // Actions class with some pre-defined actions
-  var Actions = function () {
+  var Actions = (function() {
     function Actions() {}
     Object.defineProperty(Actions, "ADD", {
-      get: function get() {
+      get: function() {
         return 'hawtio-main-nav-add';
       },
       enumerable: true,
       configurable: true
     });
     Object.defineProperty(Actions, "REMOVE", {
-      get: function get() {
+      get: function() {
         return 'hawtio-main-nav-remove';
       },
       enumerable: true,
       configurable: true
     });
     Object.defineProperty(Actions, "CHANGED", {
-      get: function get() {
+      get: function() {
         return 'hawtio-main-nav-change';
       },
       enumerable: true,
       configurable: true
     });
     Object.defineProperty(Actions, "REDRAW", {
-      get: function get() {
+      get: function() {
         return 'hawtio-main-nav-redraw';
       },
       enumerable: true,
       configurable: true
     });
     return Actions;
-  }();
+  })();
   HawtioMainNav.Actions = Actions;
 
   // Class RegistryImpl
-  var RegistryImpl = function () {
+  var RegistryImpl = (function() {
     function RegistryImpl(root) {
       this.items = [];
       this.root = root;
@@ -97,10 +97,10 @@ var HawtioMainNav;
          });
          */
     }
-    RegistryImpl.prototype.builder = function () {
+    RegistryImpl.prototype.builder = function() {
       return new HawtioMainNav.NavItemBuilderImpl();
     };
-    RegistryImpl.prototype.add = function (item) {
+    RegistryImpl.prototype.add = function(item) {
       var _this = this;
       var items = [];
       for (var _i = 1; _i < arguments.length; _i++) {
@@ -108,7 +108,7 @@ var HawtioMainNav;
       }
       var toAdd = _.union([item], items);
       this.items = _.union(this.items, toAdd);
-      toAdd.forEach(function (item) {
+      toAdd.forEach(function(item) {
         _this.root.dispatchEvent(new CustomEvent(HawtioMainNav.Actions.ADD, {
           detail: {
             item: item
@@ -124,10 +124,10 @@ var HawtioMainNav;
         detail: {}
       }));
     };
-    RegistryImpl.prototype.remove = function (search) {
+    RegistryImpl.prototype.remove = function(search) {
       var _this = this;
       var removed = _.remove(this.items, search);
-      removed.forEach(function (item) {
+      removed.forEach(function(item) {
         _this.root.dispatchEvent(new CustomEvent(HawtioMainNav.Actions.REMOVE, {
           detail: {
             item: item
@@ -144,17 +144,17 @@ var HawtioMainNav;
       }));
       return removed;
     };
-    RegistryImpl.prototype.iterate = function (iterator) {
+    RegistryImpl.prototype.iterate = function(iterator) {
       this.items.forEach(iterator);
     };
-    RegistryImpl.prototype.selected = function () {
-      var valid = _.filter(this.items, function (item) {
+    RegistryImpl.prototype.selected = function() {
+      var valid = _.filter(this.items, function(item) {
         if (!item.isValid) {
           return true;
         }
-        return item.isValid();
+        return item.isValid()
       });
-      var answer = _.find(valid, function (item) {
+      var answer = _.find(valid, function(item) {
         if (!item.isSelected) {
           return false;
         }
@@ -162,16 +162,16 @@ var HawtioMainNav;
       });
       return answer;
     };
-    RegistryImpl.prototype.on = function (action, key, fn) {
+    RegistryImpl.prototype.on = function(action, key, fn) {
       var _this = this;
       switch (action) {
         case HawtioMainNav.Actions.ADD:
-          this.root.addEventListener(HawtioMainNav.Actions.ADD, function (event) {
+          this.root.addEventListener(HawtioMainNav.Actions.ADD, function(event) {
             //log.debug("event key: ", key, " event: ", event);
             fn(event.detail.item);
           });
           if (this.items.length > 0) {
-            this.items.forEach(function (item) {
+            this.items.forEach(function(item) {
               _this.root.dispatchEvent(new CustomEvent(HawtioMainNav.Actions.ADD, {
                 detail: {
                   item: item
@@ -181,13 +181,13 @@ var HawtioMainNav;
           }
           break;
         case HawtioMainNav.Actions.REMOVE:
-          this.root.addEventListener(HawtioMainNav.Actions.REMOVE, function (event) {
+          this.root.addEventListener(HawtioMainNav.Actions.REMOVE, function(event) {
             //log.debug("event key: ", key, " event: ", event);
             fn(event.detail.item);
           });
           break;
         case HawtioMainNav.Actions.CHANGED:
-          this.root.addEventListener(HawtioMainNav.Actions.CHANGED, function (event) {
+          this.root.addEventListener(HawtioMainNav.Actions.CHANGED, function(event) {
             //log.debug("event key: ", key, " event: ", event);
             fn(event.detail.items);
           });
@@ -200,7 +200,7 @@ var HawtioMainNav;
           }
           break;
         case HawtioMainNav.Actions.REDRAW:
-          this.root.addEventListener(HawtioMainNav.Actions.REDRAW, function (event) {
+          this.root.addEventListener(HawtioMainNav.Actions.REDRAW, function(event) {
             //log.debug("event key: ", key, " event: ", event);
             fn(event);
           });
@@ -215,7 +215,7 @@ var HawtioMainNav;
       }
     };
     return RegistryImpl;
-  }();
+  })();
 
   // Factory for registry, used to create angular service
   function createRegistry(root) {
@@ -224,13 +224,13 @@ var HawtioMainNav;
   HawtioMainNav.createRegistry = createRegistry;
 
   // Class NavItemBuilderImpl
-  var NavItemBuilderImpl = function () {
+  var NavItemBuilderImpl = (function() {
     function NavItemBuilderImpl() {
       this.self = {
         id: ''
       };
     }
-    NavItemBuilderImpl.join = function () {
+    NavItemBuilderImpl.join = function() {
       var paths = [];
       for (var _i = 0; _i < arguments.length; _i++) {
         paths[_i - 0] = arguments[_i];
@@ -254,71 +254,71 @@ var HawtioMainNav;
       var rc = tmp.join('/');
       return rc;
     };
-    NavItemBuilderImpl.prototype.id = function (id) {
+    NavItemBuilderImpl.prototype.id = function(id) {
       this.self.id = id;
       return this;
     };
-    NavItemBuilderImpl.prototype.rank = function (rank) {
+    NavItemBuilderImpl.prototype.rank = function(rank) {
       this.self.rank = rank;
       return this;
     };
-    NavItemBuilderImpl.prototype.title = function (title) {
+    NavItemBuilderImpl.prototype.title = function(title) {
       this.self.title = title;
       return this;
     };
-    NavItemBuilderImpl.prototype.tooltip = function (tooltip) {
+    NavItemBuilderImpl.prototype.tooltip = function(tooltip) {
       this.self.tooltip = tooltip;
       return this;
     };
-    NavItemBuilderImpl.prototype.page = function (page) {
+    NavItemBuilderImpl.prototype.page = function(page) {
       this.self.page = page;
       return this;
     };
-    NavItemBuilderImpl.prototype.reload = function (reload) {
+    NavItemBuilderImpl.prototype.reload = function(reload) {
       this.self.reload = reload;
       return this;
     };
-    NavItemBuilderImpl.prototype.attributes = function (attributes) {
+    NavItemBuilderImpl.prototype.attributes = function(attributes) {
       this.self.attributes = attributes;
       return this;
     };
-    NavItemBuilderImpl.prototype.linkAttributes = function (attributes) {
+    NavItemBuilderImpl.prototype.linkAttributes = function(attributes) {
       this.self.linkAttributes = attributes;
       return this;
     };
-    NavItemBuilderImpl.prototype.context = function (context) {
+    NavItemBuilderImpl.prototype.context = function(context) {
       this.self.context = context;
       return this;
     };
-    NavItemBuilderImpl.prototype.href = function (href) {
+    NavItemBuilderImpl.prototype.href = function(href) {
       this.self.href = href;
       return this;
     };
-    NavItemBuilderImpl.prototype.click = function (click) {
+    NavItemBuilderImpl.prototype.click = function(click) {
       this.self.click = click;
       return this;
     };
-    NavItemBuilderImpl.prototype.isSelected = function (isSelected) {
+    NavItemBuilderImpl.prototype.isSelected = function(isSelected) {
       this.self.isSelected = isSelected;
       return this;
     };
-    NavItemBuilderImpl.prototype.isValid = function (isValid) {
+    NavItemBuilderImpl.prototype.isValid = function(isValid) {
       this.self.isValid = isValid;
       return this;
     };
-    NavItemBuilderImpl.prototype.show = function (show) {
+    NavItemBuilderImpl.prototype.show = function(show) {
       this.self.show = show;
       return this;
     };
-    NavItemBuilderImpl.prototype.template = function (template) {
+    NavItemBuilderImpl.prototype.template = function(template) {
       this.self.template = template;
       return this;
     };
-    NavItemBuilderImpl.prototype.defaultPage = function (defaultPage) {
+    NavItemBuilderImpl.prototype.defaultPage = function(defaultPage) {
       this.self.defaultPage = defaultPage;
       return this;
     };
-    NavItemBuilderImpl.prototype.tabs = function (item) {
+    NavItemBuilderImpl.prototype.tabs = function(item) {
       var items = [];
       for (var _i = 1; _i < arguments.length; _i++) {
         items[_i - 1] = arguments[_i];
@@ -326,7 +326,7 @@ var HawtioMainNav;
       this.self.tabs = _.union(this.self.tabs, [item], items);
       return this;
     };
-    NavItemBuilderImpl.prototype.subPath = function (_title, path, page, rank, reload, isValid) {
+    NavItemBuilderImpl.prototype.subPath = function(title, path, page, rank, reload, isValid) {
 
       var parent = this.self;
       if (!this.self.tabs) {
@@ -334,10 +334,10 @@ var HawtioMainNav;
       }
       var tab = {
         id: parent.id + '-' + path,
-        title: function title() {
-          return _title;
+        title: function() {
+          return title;
         },
-        href: function href() {
+        href: function() {
           if (parent.href) {
             return NavItemBuilderImpl.join(parent.href(), path);
           }
@@ -345,7 +345,7 @@ var HawtioMainNav;
         }
       };
       if (!_.isUndefined(page)) {
-        tab.page = function () {
+        tab.page = function() {
           return page;
         };
       }
@@ -361,7 +361,7 @@ var HawtioMainNav;
       this.self.tabs.push(tab);
       return this;
     };
-    NavItemBuilderImpl.prototype.build = function () {
+    NavItemBuilderImpl.prototype.build = function() {
       var answer = _.cloneDeep(this.self);
       this.self = {
         id: ''
@@ -369,11 +369,11 @@ var HawtioMainNav;
       return answer;
     };
     return NavItemBuilderImpl;
-  }();
+  })();
   HawtioMainNav.NavItemBuilderImpl = NavItemBuilderImpl;
 
   // Factory functions
-  HawtioMainNav.createBuilder = function () {
+  HawtioMainNav.createBuilder = function() {
     return new HawtioMainNav.NavItemBuilderImpl();
   };
 
@@ -383,7 +383,7 @@ var HawtioMainNav;
 
   _module.constant('layoutFull', 'templates/main-nav/layoutFull.html');
 
-  _module.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
+  _module.config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
     $locationProvider.html5Mode({
       enabled: true,
       requireBase: true
@@ -391,7 +391,7 @@ var HawtioMainNav;
     $routeProvider.otherwise({ templateUrl: 'templates/main-nav/welcome.html' });
   }]);
 
-  _module.controller('HawtioNav.WelcomeController', ['$scope', '$location', 'WelcomePageRegistry', 'HawtioNav', '$timeout', '$document', function ($scope, $location, welcome, nav, $timeout, $document) {
+  _module.controller('HawtioNav.WelcomeController', ['$scope', '$location', 'WelcomePageRegistry', 'HawtioNav', '$timeout', '$document', function($scope, $location, welcome, nav, $timeout, $document) {
 
     function gotoNavItem(item) {
       if (item && item.href) {
@@ -399,7 +399,7 @@ var HawtioMainNav;
         var uri = new URI(href);
         var search = _.merge($location.search(), uri.query(true));
         log.debug("Going to item id: ", item.id, " href: ", uri.path(), " query: ", search);
-        $timeout(function () {
+        $timeout(function() {
           $location.path(uri.path()).search(search);
         }, 10);
       }
@@ -407,13 +407,9 @@ var HawtioMainNav;
 
     function gotoFirstAvailableNav() {
       var candidates = [];
-      nav.iterate(function (item) {
-        var isValid = item.isValid || function () {
-          return true;
-        };
-        var show = item.show || function () {
-          return true;
-        };
+      nav.iterate(function(item) {
+        var isValid = item.isValid || function() { return true; };
+        var show = item.show || function() { return true; };
         if (isValid() && show()) {
           candidates.push(item);
         }
@@ -422,7 +418,7 @@ var HawtioMainNav;
       gotoNavItem(rankedCandidates[0]);
     }
 
-    $timeout(function () {
+    $timeout(function() {
       var search = $location.search();
       if (search.tab) {
         var tab = search.tab;
@@ -438,14 +434,14 @@ var HawtioMainNav;
         }
       }
       var candidates = [];
-      nav.iterate(function (item) {
+      nav.iterate(function(item) {
         if ('defaultPage' in item) {
           var page = item.defaultPage;
           if (!('rank' in page)) {
             candidates.push(item);
             return;
           }
-          var index = _.findIndex(candidates, function (i) {
+          var index = _.findIndex(candidates, function(i) {
             if ('rank' in i && item.rank > i.rank) {
               return true;
             }
@@ -463,10 +459,8 @@ var HawtioMainNav;
           log.debug("No welcome pages, going to first available nav");
           gotoFirstAvailableNav();
         }
-        var sortedPages = _.sortBy(welcome.pages, function (page) {
-          return page.rank;
-        });
-        var page = _.find(sortedPages, function (page) {
+        var sortedPages = _.sortBy(welcome.pages, function(page) { return page.rank; });
+        var page = _.find(sortedPages, function(page) {
           if ('isValid' in page) {
             return page.isValid();
           }
@@ -493,10 +487,10 @@ var HawtioMainNav;
         }
         var func = item.defaultPage.isValid;
         if (func) {
-          var yes = function yes() {
+          var yes = function() {
             gotoNavItem(item);
           };
-          var no = function no() {
+          var no = function() {
             evalCandidates(remaining);
           };
           try {
@@ -513,7 +507,7 @@ var HawtioMainNav;
     }, 500);
   }]);
 
-  _module.controller('HawtioNav.ViewController', ['$scope', '$route', '$location', 'layoutFull', 'viewRegistry', function ($scope, $route, $location, layoutFull, viewRegistry) {
+  _module.controller('HawtioNav.ViewController', ['$scope', '$route', '$location', 'layoutFull', 'viewRegistry', function($scope, $route, $location, layoutFull, viewRegistry) {
 
     findViewPartial();
 
@@ -528,15 +522,13 @@ var HawtioMainNav;
         return;
       }
       var keys = _.keys(viewRegistry);
-      var candidates = _.filter(keys, function (key) {
-        return key.charAt(0) === '{';
-      });
-      candidates.forEach(function (candidate) {
+      var candidates = _.filter(keys, function(key) { return key.charAt(0) === '{'; });
+      candidates.forEach(function(candidate) {
         if (!answer) {
           try {
             var obj = angular.fromJson(candidate);
             if (_.isObject(obj)) {
-              _.merge(obj, query, function (a, b) {
+              _.merge(obj, query, function(a, b) {
                 if (a) {
                   if (a === b) {
                     answer = viewRegistry[candidate];
@@ -599,9 +591,9 @@ var HawtioMainNav;
     }
   }]);
 
-  _module.run(['HawtioNav', '$rootScope', '$route', '$document', function (HawtioNav, $rootScope, $route, $document) {
-    HawtioNav.on(HawtioMainNav.Actions.CHANGED, "$apply", function (item) {
-      if (!$rootScope.$$phase) {
+  _module.run(['HawtioNav', '$rootScope', '$route', '$document', function(HawtioNav, $rootScope, $route, $document) {
+    HawtioNav.on(HawtioMainNav.Actions.CHANGED, "$apply", function(item) {
+      if(!$rootScope.$$phase) {
         $rootScope.$apply();
       }
     });
@@ -611,30 +603,30 @@ var HawtioMainNav;
     function applyBaseHref(item) {
       if (!item.preBase) {
         item.preBase = item.href;
-        item.href = function () {
+        item.href = function() {
           if (href) {
             var preBase = item.preBase();
             if (preBase && preBase.charAt(0) === '/') {
               preBase = preBase.substr(1);
-              return href + preBase;
+	            return href + preBase;
             }
           }
           return item.preBase();
         };
       }
     }
-    HawtioNav.on(HawtioMainNav.Actions.ADD, "htmlBaseRewriter", function (item) {
-      if (item.href) {
-        applyBaseHref(item);
-        _.forEach(item.tabs, applyBaseHref);
-      }
+    HawtioNav.on(HawtioMainNav.Actions.ADD, "htmlBaseRewriter", function(item) {
+			if (item.href) {
+	      applyBaseHref(item);
+	      _.forEach(item.tabs, applyBaseHref);
+			}
     });
-    HawtioNav.on(HawtioMainNav.Actions.ADD, "$apply", function (item) {
+    HawtioNav.on(HawtioMainNav.Actions.ADD, "$apply", function(item) {
       var oldClick = item.click;
-      item.click = function ($event) {
+      item.click = function($event) {
         if (!($event instanceof jQuery.Event)) {
           try {
-            if (!$rootScope.$$phase) {
+            if(!$rootScope.$$phase) {
               $rootScope.$apply();
             }
           } catch (e) {
@@ -649,8 +641,8 @@ var HawtioMainNav;
     $route.reload();
     log.debug("loaded");
   }]);
-  _adminjsCore.hawtioPluginLoader.addModule(HawtioMainNav.pluginName);
-  _adminjsCore.hawtioPluginLoader.addModule("ngRoute");
+  adminjsCore.hawtioPluginLoader.addModule(HawtioMainNav.pluginName);
+  adminjsCore.hawtioPluginLoader.addModule(require('angular-route'));
 
   // helper function for testing nav items
   function itemIsValid(item) {
@@ -667,7 +659,7 @@ var HawtioMainNav;
   var tmpLink = $('<a>');
   function addIsSelected($location, item) {
     if (!('isSelected' in item) && 'href' in item) {
-      item.isSelected = function () {
+      item.isSelected = function() {
         // item.href() might be relative, in which
         // case we should let the browser resolve
         // what the full path should be
@@ -688,7 +680,7 @@ var HawtioMainNav;
             return true;
           }
           if (item.tabs) {
-            var answer = _.any(item.tabs, function (subTab) {
+            var answer = _.any(item.tabs, function(subTab) {
               var answer = subTab.isSelected();
               return answer;
             });
@@ -721,9 +713,7 @@ var HawtioMainNav;
       return;
     }
     var newScope = scope.$new();
-    item.hide = function () {
-      return item.show && !item.show();
-    };
+    item.hide = function() { return item.show && !item.show(); };
     newScope.item = item;
     var template = null;
     if (_.isFunction(item.template)) {
@@ -746,7 +736,7 @@ var HawtioMainNav;
 
   function sortByRank(collection) {
     var answer = [];
-    collection.forEach(function (item) {
+    collection.forEach(function(item) {
       rankItem(item, answer);
     });
     return answer;
@@ -757,7 +747,7 @@ var HawtioMainNav;
       collection.push(item);
       return;
     }
-    var index = _.findIndex(collection, function (i) {
+    var index = _.findIndex(collection, function(i) {
       if ('rank' in i && item.rank > i.rank) {
         return true;
       }
@@ -772,12 +762,12 @@ var HawtioMainNav;
     }
   }
 
-  HawtioMainNav._module.directive('hawtioSubTabs', ['HawtioNav', '$templateCache', '$compile', '$location', '$rootScope', function (HawtioNav, $templateCache, $compile, $location, $rootScope) {
+  HawtioMainNav._module.directive('hawtioSubTabs', ['HawtioNav', '$templateCache', '$compile', '$location', '$rootScope', function(HawtioNav, $templateCache, $compile, $location, $rootScope) {
     return {
       restrict: 'A',
-      link: function link(scope, element, attrs) {
+      link: function(scope, element, attrs) {
 
-        scope.$watch(_.debounce(function () {
+        scope.$watch(_.debounce(function() {
           var selected = HawtioNav.selected();
           if (scope.selected !== selected) {
             scope.selected = selected;
@@ -786,22 +776,20 @@ var HawtioMainNav;
           }
         }, 100, { trailing: true }));
 
-        scope.$on('hawtio-nav-subtab-redraw', function () {
+        scope.$on('hawtio-nav-subtab-redraw', function() {
           log.debug("Redrawing sub-tabs");
           element.empty();
-          var selectedNav = scope.selected;
+          var selectedNav = scope.selected
           if (!selectedNav || !selectedNav.tabs) {
             return;
           }
           if (attrs['showHeading']) {
             var heading = angular.extend({}, selectedNav, {
-              template: function template() {
-                return $templateCache.get('templates/main-nav/subTabHeader.html');
-              } });
-            drawNavItem($templateCache, $compile, scope, element, heading);
+              template: function() { return $templateCache.get('templates/main-nav/subTabHeader.html'); }});
+              drawNavItem($templateCache, $compile, scope, element, heading);
           }
           var rankedTabs = sortByRank(selectedNav.tabs);
-          rankedTabs.forEach(function (item) {
+          rankedTabs.forEach(function(item) {
             drawNavItem($templateCache, $compile, scope, element, item);
           });
         });
@@ -810,29 +798,29 @@ var HawtioMainNav;
     };
   }]);
 
-  HawtioMainNav._module.directive("hawtioMainNav", ["HawtioNav", "$templateCache", "$compile", "$location", "$rootScope", function (HawtioNav, $templateCache, $compile, $location, $rootScope) {
+  HawtioMainNav._module.directive("hawtioMainNav", ["HawtioNav", "$templateCache", "$compile", "$location", "$rootScope", function(HawtioNav, $templateCache, $compile, $location, $rootScope) {
     var config = {
       nav: {},
       numKeys: 0,
       numValid: 0
     };
-    var iterationFunc = function iterationFunc(item) {
+    var iterationFunc = function(item) {
       if (itemIsValid(item)) {
         config.numValid = config.numValid + 1;
       }
     };
-    HawtioNav.on(HawtioMainNav.Actions.ADD, 'subTabEnricher', function (item) {
+    HawtioNav.on(HawtioMainNav.Actions.ADD, 'subTabEnricher', function(item) {
       if (item.tabs && item.tabs.length > 0) {
         item.tabs.forEach(function (subItem) {
           subItem.isSubTab = true;
           if (!subItem.oldHref) {
             subItem.oldHref = subItem.href;
-            subItem.href = function () {
+            subItem.href = function() {
               var uri = new URI(subItem.oldHref());
               if (uri.path() === "") {
                 return "";
               }
-              uri.search(function (search) {
+              uri.search(function(search) {
                 _.merge(search, uri.query(true));
                 if (!search['main-tab']) {
                   search['main-tab'] = item.id;
@@ -845,11 +833,11 @@ var HawtioMainNav;
         });
       }
     });
-    HawtioNav.on(HawtioMainNav.Actions.ADD, 'hrefEnricher', function (item) {
+    HawtioNav.on(HawtioMainNav.Actions.ADD, 'hrefEnricher', function(item) {
       item.isSubTab = false;
       if (item.href && !item.oldHref) {
         item.oldHref = item.href;
-        item.href = function () {
+        item.href = function() {
           var oldHref = item.oldHref();
           if (!oldHref) {
             log.debug("Item: ", item.id, " returning null for href()");
@@ -859,7 +847,7 @@ var HawtioMainNav;
           if (uri.path() === "") {
             return "";
           }
-          uri.search(function (search) {
+          uri.search(function(search) {
             if (!search['main-tab']) {
               search['main-tab'] = item.id;
             }
@@ -873,21 +861,19 @@ var HawtioMainNav;
         };
       }
     });
-    HawtioNav.on(HawtioMainNav.Actions.ADD, 'isSelectedEnricher', function (item) {
+    HawtioNav.on(HawtioMainNav.Actions.ADD, 'isSelectedEnricher', function(item) {
       addIsSelected($location, item);
       if (item.tabs) {
-        item.tabs.forEach(function (item) {
-          addIsSelected($location, item);
-        });
+        item.tabs.forEach(function(item) { addIsSelected($location, item); });
       }
     });
-    HawtioNav.on(HawtioMainNav.Actions.ADD, 'PrimaryController', function (item) {
+    HawtioNav.on(HawtioMainNav.Actions.ADD, 'PrimaryController', function(item) {
       config.nav[item.id] = item;
     });
-    HawtioNav.on(HawtioMainNav.Actions.REMOVE, 'PrimaryController', function (item) {
+    HawtioNav.on(HawtioMainNav.Actions.REMOVE, 'PrimaryController', function(item) {
       delete config.nav[item.id];
     });
-    HawtioNav.on(HawtioMainNav.Actions.CHANGED, 'PrimaryController', function (items) {
+    HawtioNav.on(HawtioMainNav.Actions.CHANGED, 'PrimaryController', function(items) {
       config.numKeys = items.length;
       config.numValid = 0;
       items.forEach(iterationFunc);
@@ -895,15 +881,15 @@ var HawtioMainNav;
     return {
       restrict: 'A',
       replace: false,
-      controller: ["$scope", "$element", "$attrs", function ($scope, $element, $attrs) {
+      controller: ["$scope", "$element", "$attrs", function($scope, $element, $attrs) {
         $scope.config = config;
-        $scope.$on('hawtio-nav-redraw', function () {
+        $scope.$on('hawtio-nav-redraw', function() {
           log.debug("Redrawing main nav");
           $element.empty();
 
           var rankedContexts = [];
           // first add any contextual menus (like perspectives)
-          HawtioNav.iterate(function (item) {
+          HawtioNav.iterate(function(item) {
             if (!('context' in item)) {
               return;
             }
@@ -917,7 +903,7 @@ var HawtioMainNav;
           });
           // then add the rest of the nav items
           var rankedTabs = [];
-          HawtioNav.iterate(function (item) {
+          HawtioNav.iterate(function(item) {
             if (item.context) {
               return;
             }
@@ -928,8 +914,8 @@ var HawtioMainNav;
           });
         });
       }],
-      link: function link(scope, element, attr) {
-        scope.$watch(_.debounce(function () {
+      link: function(scope, element, attr) {
+        scope.$watch(_.debounce(function() {
           var oldValid = config.numValid;
           var oldKeys = config.numKeys;
           config.numValid = 0;
@@ -947,10 +933,10 @@ var HawtioMainNav;
 
   // provider so it's possible to get a nav builder in _module.config()
   HawtioMainNav._module.provider('HawtioNavBuilder', [function HawtioNavBuilderProvider() {
-    this.$get = function () {
+    this.$get = function() {
       return {};
     };
-    this.create = function () {
+    this.create = function() {
       return HawtioMainNav.createBuilder();
     };
     this.join = NavItemBuilderImpl.join;
@@ -965,7 +951,7 @@ var HawtioMainNav;
       }
       $routeProvider.when(tab.href(), config);
     }
-    this.configureRouting = function ($routeProvider, tab) {
+    this.configureRouting = function($routeProvider, tab) {
       if (_.isUndefined(tab.page)) {
         if (tab.tabs) {
           var target = _.first(tab.tabs)['href'];
@@ -981,56 +967,55 @@ var HawtioMainNav;
         setRoute($routeProvider, tab);
       }
       if (tab.tabs) {
-        tab.tabs.forEach(function (tab) {
+        tab.tabs.forEach(function(tab) {
           return setRoute($routeProvider, tab);
         });
       }
     };
   }]);
 
-  HawtioMainNav._module.factory('HawtioPerspective', [function () {
+  HawtioMainNav._module.factory('HawtioPerspective', [function() {
     var log = Logger.get('hawtio-dummy-perspective');
     return {
-      add: function add(id, perspective) {
+      add: function(id, perspective) {
         log.debug("add called for id: ", id);
       },
-      remove: function remove(id) {
+      remove: function(id) {
         log.debug("remove called for id: ", id);
         return undefined;
       },
-      setCurrent: function setCurrent(id) {
+      setCurrent: function(id) {
         log.debug("setCurrent called for id: ", id);
       },
-      getCurrent: function getCurrent(id) {
+      getCurrent: function(id) {
         log.debug("getCurrent called for id: ", id);
         return undefined;
       },
-      getLabels: function getLabels() {
+      getLabels: function() {
         return [];
       }
     };
   }]);
 
-  HawtioMainNav._module.factory('WelcomePageRegistry', [function () {
+  HawtioMainNav._module.factory('WelcomePageRegistry', [function() {
     return {
       pages: []
     };
   }]);
 
-  HawtioMainNav._module.factory('HawtioNav', ['$window', '$rootScope', function ($window, $rootScope) {
+  HawtioMainNav._module.factory('HawtioNav', ['$window', '$rootScope', function($window, $rootScope) {
     var registry = HawtioMainNav.createRegistry(window);
     return registry;
   }]);
+
+  angular.module("hawtio-nav").run(["$templateCache", function($templateCache) {$templateCache.put("templates/main-nav/layoutFull.html","<div ng-view></div>\n\n\n");
+  $templateCache.put("templates/main-nav/layoutTest.html","<div>\n  <h1>Test Layout</h1>\n  <div ng-view>\n\n\n  </div>\n</div>\n\n\n");
+  $templateCache.put("templates/main-nav/navItem.html","<li ng-class=\"{ active: item.isSelected() }\" ng-hide=\"item.hide()\">\n  <a ng-href=\"{{item.href()}}\" ng-click=\"item.click($event)\" ng-bind-html=\"item.title()\" title=\"{{item.tooltip()}}\"></a>\n</li>\n");
+  $templateCache.put("templates/main-nav/subTabHeader.html","<li class=\"header\">\n  <a href=\"\"><strong>{{item.title()}}</strong></a>\n</li>\n");
+  $templateCache.put("templates/main-nav/welcome.html","<div ng-controller=\"HawtioNav.WelcomeController\"></div>\n");}]);
+
 })(HawtioMainNav || (HawtioMainNav = {}));
 
 module.exports = {
   "HawtioMainNav": HawtioMainNav
-};
-
-angular.module("hawtio-nav").run(["$templateCache", function ($templateCache) {
-  $templateCache.put("templates/main-nav/layoutFull.html", "<div ng-view></div>\n\n\n");
-  $templateCache.put("templates/main-nav/layoutTest.html", "<div>\n  <h1>Test Layout</h1>\n  <div ng-view>\n\n\n  </div>\n</div>\n\n\n");
-  $templateCache.put("templates/main-nav/navItem.html", "<li ng-class=\"{ active: item.isSelected() }\" ng-hide=\"item.hide()\">\n  <a ng-href=\"{{item.href()}}\" ng-click=\"item.click($event)\" ng-bind-html=\"item.title()\" title=\"{{item.tooltip()}}\"></a>\n</li>\n");
-  $templateCache.put("templates/main-nav/subTabHeader.html", "<li class=\"header\">\n  <a href=\"\"><strong>{{item.title()}}</strong></a>\n</li>\n");
-  $templateCache.put("templates/main-nav/welcome.html", "<div ng-controller=\"HawtioNav.WelcomeController\"></div>\n");
-}]);
+}
