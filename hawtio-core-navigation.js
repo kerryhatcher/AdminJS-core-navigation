@@ -11,6 +11,8 @@ var adminjsCore = require('adminjs-core');
 
 var angular = require('angular');
 var Logger = require('js-logger');
+var URI = require('urijs');
+var _ = require('lodash');
 
 
 (function () {
